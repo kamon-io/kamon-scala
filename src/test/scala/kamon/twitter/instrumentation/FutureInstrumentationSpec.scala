@@ -17,11 +17,12 @@ package kamon.twitter.instrumentation
 
 import java.util.concurrent.Executors
 
-import org.scalatest.{Matchers, OptionValues, WordSpec}
-import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import com.twitter.util.{Await, FuturePool}
 import kamon.Kamon
 import kamon.Kamon.buildSpan
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.{Matchers, OptionValues, WordSpec}
+
 
 class FutureInstrumentationSpec extends WordSpec with Matchers with ScalaFutures with PatienceConfiguration with OptionValues {
   implicit val execContext = Executors.newCachedThreadPool()
