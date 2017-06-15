@@ -15,46 +15,39 @@
  * ========================================================== */
 package kamon.scala.instrumentation
 
-import kamon.testkit.BaseKamonSpec
-import kamon.trace.Tracer
-import org.scalatest.OptionValues
-import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
+import kamon.Kamon
+import kamon.Kamon.buildSpan
+import org.scalatest.{Matchers, OptionValues, WordSpec}
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-class FutureInstrumentationSpec extends BaseKamonSpec("future-instrumentation-spec") with ScalaFutures
+class FutureInstrumentationSpec extends WordSpec with ScalaFutures with Matchers
     with PatienceConfiguration with OptionValues {
 
-  implicit val execContext = system.dispatcher
-
-  "a Future created with FutureTracing" should {
-    "capture the TraceContext available when created" which {
+  "a Future created when instrumentation is active" should {
+    "capture the active span available when created" which {
       "must be available when executing the future's body" in {
-
-        val (future, testTraceContext) = Tracer.withContext(newContext("future-body")) {
-          val future = Future(Tracer.currentContext)
-
-          (future, Tracer.currentContext)
+        val testSpan = buildSpan("future-body").startManual().setBaggageItem("propagate", "in-future-body")
+        val baggageInBody = Kamon.withSpan(testSpan) {
+          Future(Kamon.activeSpan().getBaggageItem("propagate"))
         }
 
-        whenReady(future)(ctxInFuture ⇒
-          ctxInFuture should equal(testTraceContext))
+        whenReady(baggageInBody)(baggageValue ⇒ baggageValue should be("in-future-body"))
       }
 
       "must be available when executing callbacks on the future" in {
+        val testSpan = buildSpan("future-transformations").startManual().setBaggageItem("propagate", "in-future-transformations")
+        val baggageAfterTransformations = Kamon.withSpan(testSpan) {
+            Future("Hello Kamon!")
+              // The active span is expected to be available during all intermediate processing.
+              .map(_.length)
+              .flatMap(len ⇒ Future(len.toString))
+              .map(_ ⇒ Kamon.activeSpan().getBaggageItem("propagate"))
+          }
 
-        val (future, testTraceContext) = Tracer.withContext(newContext("future-body")) {
-          val future = Future("Hello Kamon!")
-            // The TraceContext is expected to be available during all intermediate processing.
-            .map(_.length)
-            .flatMap(len ⇒ Future(len.toString))
-            .map(s ⇒ Tracer.currentContext)
-
-          (future, Tracer.currentContext)
-        }
-
-        whenReady(future)(ctxInFuture ⇒
-          ctxInFuture should equal(testTraceContext))
+        whenReady(baggageAfterTransformations)(baggageValue ⇒ baggageValue should equal("in-future-transformations"))
       }
     }
   }

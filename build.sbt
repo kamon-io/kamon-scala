@@ -1,5 +1,5 @@
 /* =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -13,29 +13,29 @@
  * =========================================================================================
  */
 
-val kamonCore  = "io.kamon" %% "kamon-core" % "0.6.7"
-val scalazConcurrent  = "org.scalaz" %% "scalaz-concurrent" % "7.2.8"
+val kamonCore         = "io.kamon"    %% "kamon-core"                   % "1.0.0-alpha1-05732d8693910248338744fa587bc4bc38ffb1ed"
+val scalazConcurrent  = "org.scalaz"  %% "scalaz-concurrent"            % "7.2.8"
+
+//kamon-agent
+val agentScala        = "io.kamon"    %% "agent-scala-extension"        % "0.0.3-experimental"
+val kamonAgent        = "io.kamon"    %  "kamon-agent"                  % "0.0.3-experimental"
 
 lazy val root = (project in file("."))
   .settings(name := "kamon-scala")
   .settings(aspectJSettings: _*)
+  .enablePlugins(JavaAgent)
+  .settings(javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.10"  % "compile;test")
+//  .settings(javaAgents += "io.kamon"    % "kamon-agent"   % "0.0.3-experimental"  % "test")
   .settings(
       libraryDependencies ++=
-        compileScope(kamonCore) ++
-        providedScope(aspectJ) ++
+        compileScope(kamonCore, agentScala) ++
+        providedScope(aspectJ, kamonAgent) ++
         optionalScope(scalazConcurrent, twitterDependency("core").value) ++
-        testScope(scalatest, akkaDependency("testkit").value, akkaDependency("slf4j").value, logbackClassic))
+        testScope(scalatest, logbackClassic))
 
 def twitterDependency(moduleName: String) = Def.setting {
   scalaBinaryVersion.value match {
     case "2.10"           => "com.twitter" %% s"util-$moduleName" % "6.34.0"
     case "2.11" | "2.12"  => "com.twitter" %% s"util-$moduleName" % "6.40.0"
-  }
-}
-
-def akkaDependency(moduleName: String) = Def.setting {
-  scalaBinaryVersion.value match {
-    case "2.10"           => "com.typesafe.akka" %% s"akka-$moduleName" % "2.3.16"
-    case "2.11" | "2.12"  => "com.typesafe.akka" %% s"akka-$moduleName" % "2.4.16"
   }
 }
