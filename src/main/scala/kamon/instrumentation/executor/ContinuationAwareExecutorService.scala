@@ -47,14 +47,14 @@ class ContinuationAwareExecutorService(underlying: ExecutorService) extends Exec
     underlying.invokeAny(wrapCallables(tasks), timeout, unit)
   }
 
-  private def wrapRunnable(r: Runnable): TraceContextAwareRunnable = r match {
-    case runnable: TraceContextAwareRunnable ⇒ runnable
-    case _                                   ⇒ new TraceContextAwareRunnable(r)
+  private def wrapRunnable(r: Runnable): ContinuationAwareRunnable = r match {
+    case runnable: ContinuationAwareRunnable ⇒ runnable
+    case _                                   ⇒ new ContinuationAwareRunnable(r)
   }
 
-  private def wrapCallable[T](r: Callable[T]): TraceContextAwareCallable[T] = r match {
-    case callable: TraceContextAwareCallable[T] ⇒ callable
-    case _                                      ⇒ new TraceContextAwareCallable[T](r)
+  private def wrapCallable[T](r: Callable[T]): ContinuationAwareCallable[T] = r match {
+    case callable: ContinuationAwareCallable[T] ⇒ callable
+    case _                                      ⇒ new ContinuationAwareCallable[T](r)
   }
 
   private def wrapCallables[T](tasks: util.Collection[_ <: Callable[T]]) = {
@@ -64,7 +64,7 @@ class ContinuationAwareExecutorService(underlying: ExecutorService) extends Exec
   }
 }
 
-class TraceContextAwareRunnable(r: Runnable) extends Runnable {
+class ContinuationAwareRunnable(r: Runnable) extends Runnable {
   val continuation = Kamon.activeSpan().capture()
 
   override def run(): Unit = {
@@ -74,7 +74,7 @@ class TraceContextAwareRunnable(r: Runnable) extends Runnable {
   }
 }
 
-class TraceContextAwareCallable[A](c: Callable[A]) extends HasContinuation with Callable[A] {
+class ContinuationAwareCallable[A](c: Callable[A]) extends HasContinuation with Callable[A] {
   val continuation = Kamon.activeSpan().capture()
 
   override def call(): A = {
