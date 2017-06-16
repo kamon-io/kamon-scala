@@ -24,7 +24,6 @@ class FutureInstrumentation extends KamonInstrumentation {
     * Instrument:
     *
     * scalaz.concurrent.Future::apply
-    *
     */
   val ApplyMethod = named("apply")
 

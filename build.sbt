@@ -13,23 +13,23 @@
  * =========================================================================================
  */
 
-val kamonCore         = "io.kamon"    %% "kamon-core"                   % "1.0.0-alpha1-05732d8693910248338744fa587bc4bc38ffb1ed"
+
+val kamonCore         = "io.kamon"    %% "kamon-core"                   % "1.0.0-RC1-dd645df1b7c462418c01074d0e137982d2f270b7"
+val kamonExecutors    = "io.kamon"    %% "kamon-executors"              % "1.0.0-RC1-82bae39750d62b3060214d0c2c19cf3894b97323" exclude("io.kamon", "kamon-core")
+
+val scalaExtension    = "io.kamon"    %% "agent-scala-extension"        % "0.0.3-experimental"
+
 val scalazConcurrent  = "org.scalaz"  %% "scalaz-concurrent"            % "7.2.8"
 
-//kamon-agent
-val agentScala        = "io.kamon"    %% "agent-scala-extension"        % "0.0.3-experimental"
-val kamonAgent        = "io.kamon"    %  "kamon-agent"                  % "0.0.3-experimental"
 
 lazy val root = (project in file("."))
   .settings(name := "kamon-scala")
-  .settings(aspectJSettings: _*)
   .enablePlugins(JavaAgent)
-  .settings(javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.10"  % "compile;test")
-//  .settings(javaAgents += "io.kamon"    % "kamon-agent"   % "0.0.3-experimental"  % "test")
+  .settings(resolvers += Resolver.bintrayRepo("kamon-io", "snapshots"))
+  .settings(javaAgents += "io.kamon"    % "kamon-agent"   % "0.0.3-experimental"  % "compile;test")
   .settings(
       libraryDependencies ++=
-        compileScope(kamonCore, agentScala) ++
-        providedScope(aspectJ, kamonAgent) ++
+        compileScope(kamonCore, kamonExecutors, scalaExtension) ++
         optionalScope(scalazConcurrent, twitterDependency("core").value) ++
         testScope(scalatest, logbackClassic))
 
@@ -39,3 +39,5 @@ def twitterDependency(moduleName: String) = Def.setting {
     case "2.11" | "2.12"  => "com.twitter" %% s"util-$moduleName" % "6.40.0"
   }
 }
+
+

@@ -30,8 +30,8 @@ class FutureInstrumentation extends KamonInstrumentation {
     *
     * Mix:
     *
-    * scala.concurrent.impl.CallbackRunnable with kamon.trace.TraceContextAware
-    * scala.concurrent.impl.Future$PromiseCompletingRunnable with kamon.trace.TraceContextAware
+    * scala.concurrent.impl.CallbackRunnable with kamon.instrumentation.mixin.HasContinuationMixin
+    * scala.concurrent.impl.Future$PromiseCompletingRunnable kamon.instrumentation.mixin.HasContinuationMixin
     *
     */
 
