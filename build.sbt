@@ -25,6 +25,7 @@ val scalazConcurrent  = "org.scalaz"  %% "scalaz-concurrent"            % "7.2.8
 lazy val root = (project in file("."))
   .settings(name := "kamon-scala")
   .enablePlugins(JavaAgent)
+  .settings(isSnapshot := true)
   .settings(resolvers += Resolver.bintrayRepo("kamon-io", "snapshots"))
   .settings(javaAgents += "io.kamon"    % "kamon-agent"   % "0.0.3-experimental"  % "compile;test")
   .settings(
