@@ -29,5 +29,5 @@ class HasContinuationMixin extends HasContinuation {
   var continuation:Continuation = _
 
   @Initializer
-  def init(): Unit = this.continuation = Kamon.activeSpan().capture()
+  def init(): Unit = this.continuation = Kamon.activeSpanContinuation()
 }

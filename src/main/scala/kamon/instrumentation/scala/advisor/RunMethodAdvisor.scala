@@ -28,10 +28,8 @@ import kamon.util.HasContinuation
 class RunMethodAdvisor
 object RunMethodAdvisor {
   @OnMethodEnter
-  def onEnter(@This runnable: HasContinuation): ActiveSpan = {
-    if(runnable.continuation != null)  runnable.continuation.activate()
-    else NoopActiveSpan.INSTANCE
-  }
+  def onEnter(@This runnable: HasContinuation): ActiveSpan =
+    Option(runnable.continuation).map(_.activate()).getOrElse(NoopActiveSpan.INSTANCE)
 
   @OnMethodExit(onThrowable = classOf[Throwable])
   def onExit(@Enter activeSpan:ActiveSpan): Unit =
