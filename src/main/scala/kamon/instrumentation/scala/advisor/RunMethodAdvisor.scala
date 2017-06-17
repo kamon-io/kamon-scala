@@ -29,7 +29,7 @@ class RunMethodAdvisor
 object RunMethodAdvisor {
   @OnMethodEnter
   def onEnter(@This runnable: HasContinuation): ActiveSpan =
-    Option(runnable.continuation).map(_.activate()).getOrElse(NoopActiveSpan.INSTANCE)
+    if(runnable.continuation == null) NoopActiveSpan.INSTANCE else runnable.continuation.activate()
 
   @OnMethodExit(onThrowable = classOf[Throwable])
   def onExit(@Enter activeSpan:ActiveSpan): Unit =
