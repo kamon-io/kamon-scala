@@ -19,6 +19,8 @@ package kamon.instrumentation.scala
 import kamon.agent.scala.KamonInstrumentation
 import kamon.instrumentation.scala.advisor.RunMethodAdvisor
 import kamon.instrumentation.mixin.HasContinuationMixin
+import kamon.instrumentation.scalaz.advisor.{ParameterSubstitutionAdvisor => ScalazParameterSubstitutionAdvisor}
+import kamon.instrumentation.twitter.advisor.{ParameterSubstitutionAdvisor => TwitterParameterSubstitutionAdvisor}
 
 class FutureInstrumentation extends KamonInstrumentation {
 
@@ -34,13 +36,33 @@ class FutureInstrumentation extends KamonInstrumentation {
     * scala.concurrent.impl.Future$PromiseCompletingRunnable kamon.instrumentation.mixin.HasContinuationMixin
     *
     */
-
-  val RunMethod = named("run")
-
   forTargetType("scala.concurrent.impl.CallbackRunnable" or "scala.concurrent.impl.Future$PromiseCompletingRunnable") { builder ⇒
     builder
       .withMixin(classOf[HasContinuationMixin])
-      .withAdvisorFor(RunMethod, classOf[RunMethodAdvisor])
+      .withAdvisorFor(named("run"), classOf[RunMethodAdvisor])
+      .build()
+  }
+
+  /**
+    * Instrument:
+    *
+    * scalaz.concurrent.Future::apply
+    *
+    */
+  forTargetType("scalaz.concurrent.Future$") { builder ⇒
+    builder
+      .withAdvisorFor(named("apply"), classOf[ScalazParameterSubstitutionAdvisor])
+      .build()
+  }
+
+  /**
+    * Instrument:
+    *
+    * com.twitter.util.FuturePool::apply
+    */
+  forTargetType("com.twitter.util.FuturePool$") { builder ⇒
+    builder
+      .withAdvisorFor(named("apply"), classOf[TwitterParameterSubstitutionAdvisor])
       .build()
   }
 }

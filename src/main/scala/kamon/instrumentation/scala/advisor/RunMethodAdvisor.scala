@@ -17,6 +17,7 @@
 package kamon.instrumentation.scala.advisor
 
 import io.opentracing.ActiveSpan
+import io.opentracing.NoopActiveSpanSource.NoopActiveSpan
 import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit, This}
 import kamon.util.HasContinuation
 
@@ -27,8 +28,10 @@ import kamon.util.HasContinuation
 class RunMethodAdvisor
 object RunMethodAdvisor {
   @OnMethodEnter
-  def onEnter(@This runnable: HasContinuation): ActiveSpan =
-    runnable.continuation.activate()
+  def onEnter(@This runnable: HasContinuation): ActiveSpan = {
+    if(runnable.continuation != null)  runnable.continuation.activate()
+    else NoopActiveSpan.INSTANCE
+  }
 
   @OnMethodExit(onThrowable = classOf[Throwable])
   def onExit(@Enter activeSpan:ActiveSpan): Unit =
