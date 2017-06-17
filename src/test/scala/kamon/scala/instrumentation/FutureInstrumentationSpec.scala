@@ -29,8 +29,6 @@ class FutureInstrumentationSpec extends WordSpec with ScalaFutures with Matchers
   "a Future created when instrumentation is active" should {
     "capture the active span available when created" which {
       "must be available when executing the future's body" in {
-        Future(println("puto"))
-
         val testSpan = buildSpan("future-body").startManual().setBaggageItem("propagate", "in-future-body")
         val baggageInBody = Kamon.withSpan(testSpan) {
           Future(Kamon.activeSpan().getBaggageItem("propagate"))
