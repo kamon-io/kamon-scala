@@ -18,7 +18,7 @@ To get started with SBT, simply add the following to your `build.sbt`
 file:
 
 ```scala
-libraryDependencies += "io.kamon" %% "kamon-scala" % "1.0.0"
+libraryDependencies += "io.kamon" %% "kamon-scala" % "experimental-1.0.0-RC1"
 ```
 
 
